@@ -11,9 +11,6 @@ data DateTime = DateTime { date :: Date
                          , utc  :: Bool }
     deriving (Eq, Ord)
 
-instance Show DateTime where
-    show = printDateTime
-
 data Date = Date { year  :: Year
                  , month :: Month
                  , day   :: Day }
@@ -79,12 +76,15 @@ run p input = getOutput (parse p input)
 
 -- Exercise 3
 printDateTime :: DateTime -> String
-printDateTime (DateTime date time bool) = printDate date ++ "T" ++ printTime time ++ printBool bool
+printDateTime (DateTime date time bool) = printDate date ++ "T" ++printTime  time ++ printBool bool
     where
-        printDate (Date (Year y) (Month m) (Day d)) = show y ++ show m ++ show d
-        printTime (Time (Hour h) (Minute m) (Second s)) = show h++ show m ++ show s
-        printBool False = []
-        printBool True = "Z"
+ 	    printDate (Date (Year y) (Month m) (Day d)) = show' y ++ show' m ++ show' d
+	    printTime (Time (Hour h) (Minute m) (Second s)) = show' h++ show' m ++ show' s
+	    printBool False = []
+	    printBool True = "Z"
+        
+show' i | i < 10 = '0': show i -- alt version of show that keeps the string length consistant
+        | otherwise = show i
 
 -- Exercise 4
 parsePrint s = fmap printDateTime $ run parseDateTime  s
