@@ -52,4 +52,23 @@ readCalendar fp = do
 -- Exercise 9
 -- DO NOT use a derived Show instance. Your printing style needs to be nicer than that :)
 printCalendar :: Calendar -> String
-printCalendar = undefined
+printCalendar (Calendar p v evs) = 
+    "BEGIN:VCALENDAR\r\nVERSION:" ++ v 
+    ++ "\r\nPRODID:" ++ p ++ "\r\n" 
+    ++ concatMap printEvent evs 
+    ++ "END:VCALENDAR\r\n"
+
+-- Used in ex. 9 for printing optional elements.
+printMaybeString :: Maybe a -> String-> String
+printMaybeString Nothing = ""
+printMaybeString (Just x) is = "\r\n" ++ is ++ x
+
+printEvent (Event dtstamp id start end desc sum loc) = "BEGIN:VEVENT" 
+    ++ "\r\nUID:" ++ id 
+    ++ "\r\nDTSTAMP:" ++ printDateTime dtstamp
+    ++ "\r\nDTSTART:" ++ printDateTime start
+    ++ "\r\nDTEND:" ++ printDateTime end
+    ++ printMaybeString desc "DESCRIPTION:" 
+    ++ printMaybeString sum "SUMMARY:"
+    ++ printMaybeString loc "LOCATION:"
+    ++ "\r\nEND:VEVENT\r\n"
