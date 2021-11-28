@@ -91,7 +91,6 @@ show' i | i < 10 = '0': show i -- alt version of show that keeps the string leng
 -- Exercise 4
 parsePrint s = fmap printDateTime $ run parseDateTime s
 
-
 -- data DateTime = DateTime { date :: Date
 --                          , time :: Time
 --                          , utc  :: Bool 

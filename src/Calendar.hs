@@ -3,6 +3,7 @@ module Calendar where
 import ParseLib.Abstract
 import Prelude hiding ((<$), ($>), (<*), (*>), sequence)
 import DateTime
+import System.IO -- for readCalendar
 
 
 -- Exercise 6
@@ -42,7 +43,11 @@ recognizeCalendar s = run scanCalendar s >>= run parseCalendar
 
 -- Exercise 8
 readCalendar :: FilePath -> IO (Maybe Calendar)
-readCalendar = undefined
+readCalendar fp = do
+    file <- openFile fp ReadMode -- readMode is enough, since no manipulation is needed
+    hSetNewlineMode file noNewlineTranslation -- advice of the document
+    content <- hGetContents file
+    return $ recognizeCalendar content
 
 -- Exercise 9
 -- DO NOT use a derived Show instance. Your printing style needs to be nicer than that :)
