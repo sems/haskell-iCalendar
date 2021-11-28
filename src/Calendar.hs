@@ -6,10 +6,25 @@ import DateTime
 
 
 -- Exercise 6
-data Calendar = Calendar
+data Calendar = Calendar {
+    prodid :: String,
+    version :: Version,
+    events :: [Event]
+}
     deriving (Eq, Ord, Show)
 
-data Event = Event
+data Version = V2
+    deriving (Eq, Ord, Show)
+
+data Event = Event{
+    dtstamp :: DateTime,
+    id :: String,
+    start :: DateTime,
+    end :: DateTime,
+    desc :: Maybe String,
+    sum :: Maybe String,
+    loc :: Maybe String
+}
     deriving (Eq, Ord, Show)
 
 -- Exercise 7

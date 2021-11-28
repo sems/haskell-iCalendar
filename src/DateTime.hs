@@ -29,6 +29,8 @@ newtype Hour   = Hour   { runHour   :: Int } deriving (Eq, Ord)
 newtype Minute = Minute { runMinute :: Int } deriving (Eq, Ord)
 newtype Second = Second { runSecond :: Int } deriving (Eq, Ord)
 
+instance Show DateTime where
+    show = printDateTime
 
 parseDate :: Parser Char Date
 parseDate = Date <$> (Year <$> parse4Digits)
