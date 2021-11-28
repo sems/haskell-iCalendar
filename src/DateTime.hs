@@ -119,6 +119,7 @@ validDay (Date y (Month m) (Day d)) | m == 2 && isLeapYear y = 1 <= d && d <= 29
                                     | m == 2 = 1 <= d && d <= 28 -- february and no leap year
                                     | m == 4 || m == 6 || m == 9 || m == 11 = 1 <= d && d <= 30 -- all months with a maximimum of 30 days, source: https://en.wikipedia.org/wiki/Gregorian_calendar
                                     | otherwise = 1 <= d && d <= 31 -- all other with 31 days
+
 validYear :: Year -> Bool
 validYear (Year y) = 0 <= y
 
