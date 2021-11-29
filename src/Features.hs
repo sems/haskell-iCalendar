@@ -15,14 +15,19 @@ countEvents (Calendar _ _ evs) = length evs
 findEvents :: DateTime -> Calendar -> [Event]
 findEvents d (Calendar _ _ []) = []
 findEvents d (Calendar id v (ev:evs)) 
-    | d >= startEvent && d <= endEvent = ev : findEvents d (Calendar id v evs) -- can compare because it is of Eq instance
+    | d >= startEvent && d < endEvent = ev : findEvents d (Calendar id v evs) -- can compare because it is of Eq instance
     | otherwise = findEvents d (Calendar id v evs)
     where
         startEvent = start ev
         endEvent = end ev
         
 checkOverlapping :: Calendar -> Bool
-checkOverlapping = undefined
+checkOverlapping (Calendar _ _ []) = False
+checkOverlapping (Calendar id v events@(ev:evs)) = any p events || checkOverlapping (Calendar id v evs)
+    where
+        -- if an event's start or end is within the timeframe of a given event.
+        p ev' = between (start ev') (start ev) (end ev) || between (end ev') (start ev) (end ev)
+        between x y z | x < y = y < z | otherwise = False
 
 timeSpent :: String -> Calendar -> Int
 timeSpent = undefined
