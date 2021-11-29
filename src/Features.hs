@@ -26,7 +26,7 @@ checkOverlapping (Calendar _ _ []) = False
 checkOverlapping (Calendar id v events@(ev:evs)) = any p events || checkOverlapping (Calendar id v evs)
     where
         -- if an event's start or end is within the timeframe of a given event.
-        p ev' = between (start ev') (start ev) (end ev) || between (end ev') (start ev) (end ev)
+        p ev' = between (start ev) (start ev') (end ev) || between (start ev) (end ev') (end ev)
         between x y z | x < y = y < z | otherwise = False
 
 timeSpent :: String -> Calendar -> Int
