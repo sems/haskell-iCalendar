@@ -94,7 +94,7 @@ printCalendar (Calendar p v evs) =
     ++ "END:VCALENDAR\r\n"
 
 -- Used in ex. 9 for printing optional elements.
-printMaybeString :: Maybe String -> String-> String
+printMaybeString :: Maybe String -> String -> String
 printMaybeString Nothing _ = ""
 printMaybeString (Just x) is = "\r\n" ++ is ++ x
 
