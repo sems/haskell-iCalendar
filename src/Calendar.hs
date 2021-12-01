@@ -68,30 +68,29 @@ parseSumT =  pack (token "SUMMARY:") (SumT <$> some (satisfy (/= '\r'))) (token 
 parseLocT =  pack (token "LOCATION:") (LocT <$> some (satisfy (/= '\r'))) (token "\r\n")
 parseEndT = pack (token "END:") ( EndT <$ some (satisfy (/= '\r'))) (token "\r\n")
 
-aa = recognizeCalendar "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//hacksw/handcal//NONSGML v1.0//EN\r\nBEGIN:VEVENT\r\nUID:19970610T172345Z-AF23B2@example.com\r\nDTSTAMP:19970610T172345Z\r\nDTSTART:19970714T170000Z\r\nDTEND:19970715T040000Z\r\nSUMMARY:Bastille Day Party\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+aa = printCalendar $ fromJust $ recognizeCalendar "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//hacksw/handcal//NONSGML v1.0//EN\r\nBEGIN:VEVENT\r\nUID:19970610T172345Z-AF23B2@example.com\r\nDTSTAMP:19970610T172345Z\r\nDTSTART:19970714T170000Z\r\nDTEND:19970715T040000Z\r\nSUMMARY:Bastille Day Party\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
 
 parseCalendar :: Parser Token Calendar
 parseCalendar = pack (symbol BeginT) (Calendar <$> parseVers <*> parseProId <*> many parseEvent ) (symbol EndT)
 
-
+parseEvent :: Parser Token Event
 parseEvent = pack (symbol BeginT) ( getEvent <$> (sort <$> many (satisfy (/= EndT))) )(symbol EndT)
- 
 
---getEvent = Event <$> parseDtStamp <*> parseUid <*> parseStart <*> parsedtEnd <*> parseDesc <*> parseSum  <*> parseLoc
-
-
+getEvent :: [Token] -> Event
 getEvent (DtstampT a: UidT b: StartT c: DtEndT d: xs) = f $ getDesc xs
             where getDesc [] = [Nothing,Nothing,Nothing]
                   getDesc (DescT y:ys) = getSum [Just y] ys
-                  getDesc (_ :ys) = getSum [Nothing] ys
+                  getDesc ys = getSum [Nothing] ys
                   getSum x [] = x ++ [Nothing,Nothing]
                   getSum x (SumT y : ys) = getLoc (x ++ [Just y]) ys
-                  getSum x (_ :ys) = getLoc (x ++ [Nothing]) ys
+                  getSum x ys = getLoc (x ++ [Nothing]) ys
                   getLoc x [] = x ++ [Nothing]
                   getLoc x [LocT y] = x ++ [Just y]
                   f [x,y,z]= Event a b c d x y z
-
+                  
+parseVers :: Parser Token Version
 parseVers = V2 <$ symbol (VersionT V2)
+parseProId :: Parser Token String
 parseProId = (\(ProdidT x) -> x) <$> anySymbol
 
 recognizeCalendar :: String -> Maybe Calendar
