@@ -5,6 +5,7 @@ import Calendar
 import Text.PrettyPrint.Boxes
 import Data.Time as DT
 import Data.Fixed
+import Data.List as DL
 
 -- Exercise 10
 -- prodid :: String,
@@ -31,19 +32,8 @@ checkOverlapping (Calendar id v events@(ev:evs)) = any p events || checkOverlapp
         between x y z | x < y = y < z | otherwise = False
 
 timeSpent :: String -> Calendar -> Int
-timeSpent sum (Calendar id v events@(ev:evs)) = undefined -- filter (filterEvent sum) events -- list of events with given summary
+timeSpent sum (Calendar id v events) = DL.sum $ map durationOfEvent $ filter (filterBySummary sum) events -- list of events with given summary
 
--- date :: Date
--- , time :: Time
--- , utc  :: Bool
-
--- data Date = Date { year  :: Year
---                  , month :: Month
---                  , day   :: Day }
-
--- newtype Hour   = Hour   { runHour   :: Int } deriving (Eq, Ord)
--- newtype Minute = Minute { runMinute :: Int } deriving (Eq, Ord)
--- newtype Second = Second { runSecond :: Int } deriving (Eq, Ord)
 durationOfEvent :: Event -> Int
 durationOfEvent (Event _ _ (DateTime sDate@(Date (Year sYear) (Month sMonth) (Day sDay)) (Time (Hour sHour) (Minute sMinute) (Second sSecond)) _) (DateTime eDate@(Date (Year eYear) (Month eMonth) (Day eDay)) (Time (Hour eHour) (Minute eMinute) (Second eSecond)) _) _ _ _) = floor $ toRational $ abs diffTime -- differenceInDays
     where
