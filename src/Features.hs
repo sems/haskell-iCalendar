@@ -4,6 +4,7 @@ import DateTime
 import Calendar
 import Text.PrettyPrint.Boxes
 import Data.Time as DT
+import Data.Fixed
 
 -- Exercise 10
 -- prodid :: String,
@@ -43,8 +44,8 @@ timeSpent sum (Calendar id v events@(ev:evs)) = undefined -- filter (filterEvent
 -- newtype Hour   = Hour   { runHour   :: Int } deriving (Eq, Ord)
 -- newtype Minute = Minute { runMinute :: Int } deriving (Eq, Ord)
 -- newtype Second = Second { runSecond :: Int } deriving (Eq, Ord)
-durationOfEvent :: Event -> Integer
-durationOfEvent (Event _ _ (DateTime sDate@(Date (Year sYear) (Month sMonth) (Day sDay)) (Time (Hour sHour) (Minute sMinute) (Second sSecond)) _) (DateTime eDate@(Date (Year eYear) (Month eMonth) (Day eDay)) (Time (Hour eHour) (Minute eMinute) (Second eSecond)) _) _ _ _) = differenceInDays
+durationOfEvent :: Event -> Int
+durationOfEvent (Event _ _ (DateTime sDate@(Date (Year sYear) (Month sMonth) (Day sDay)) (Time (Hour sHour) (Minute sMinute) (Second sSecond)) _) (DateTime eDate@(Date (Year eYear) (Month eMonth) (Day eDay)) (Time (Hour eHour) (Minute eMinute) (Second eSecond)) _) _ _ _) = floor $ toRational $ abs diffTime -- differenceInDays
     where
         differenceInDays = abs $ fromInteger $ DT.diffDays startDay endDay
         --
@@ -56,11 +57,11 @@ durationOfEvent (Event _ _ (DateTime sDate@(Date (Year sYear) (Month sMonth) (Da
         endTimeSecond = (eHour * 3600) + (eMinute * 60) + eSecond
         ---
         startTime :: DT.UTCTime
-        startTime = DT.UTCTime startDay $ DT.secondsToDiffTime startTimeSecond
+        startTime = DT.UTCTime startDay $ DT.secondsToDiffTime $ toInteger startTimeSecond
         endTime :: DT.UTCTime
-        endTime = DT.UTCTime endDay $ DT.secondsToDiffTime endTimeSecond
+        endTime = DT.UTCTime endDay $ DT.secondsToDiffTime $ toInteger endTimeSecond
         --
-        diffTime = DT.diffUTCTime startTime endTime
+        diffTime = DT.nominalDiffTimeToSeconds $ DT.diffUTCTime startTime endTime
 
 
 filterBySummary :: String -> Event -> Bool
