@@ -31,28 +31,31 @@ checkOverlapping (Calendar id v events@(ev:evs)) = any p events || checkOverlapp
         p ev' = between (start ev) (start ev') (end ev) || between (start ev) (end ev') (end ev)
         between x y z | x < y = y < z | otherwise = False
 
+-- Returns 0 if there are no matches
+-- Will round to lower in minutes.
 timeSpent :: String -> Calendar -> Int
-timeSpent sum (Calendar id v events) = DL.sum $ map durationOfEvent $ filter (filterBySummary sum) events -- list of events with given summary
+timeSpent sum (Calendar id v events) = diffInSeconds `div` 60 
+    where
+        diffInSeconds = DL.sum $ map durationOfEvent filteredEvents  
+        filteredEvents = filter (filterBySummary sum) events -- list of events with given summary
 
 durationOfEvent :: Event -> Int
-durationOfEvent (Event _ _ (DateTime sDate@(Date (Year sYear) (Month sMonth) (Day sDay)) (Time (Hour sHour) (Minute sMinute) (Second sSecond)) _) (DateTime eDate@(Date (Year eYear) (Month eMonth) (Day eDay)) (Time (Hour eHour) (Minute eMinute) (Second eSecond)) _) _ _ _) = floor $ toRational $ abs diffTime -- differenceInDays
+durationOfEvent (Event _ _ (DateTime sDate@(Date (Year sYear) (Month sMonth) (Day sDay)) (Time (Hour sHour) (Minute sMinute) (Second sSecond)) _) (DateTime eDate@(Date (Year eYear) (Month eMonth) (Day eDay)) (Time (Hour eHour) (Minute eMinute) (Second eSecond)) _) _ _ _) = floor $ abs diffTime -- abs is needed because it is negative as default and floor to trim trailing zero's
     where
-        differenceInDays = abs $ fromInteger $ DT.diffDays startDay endDay
-        --
-        startDay :: DT.Day
-        startDay = DT.fromGregorian (toInteger sYear) sMonth sDay
-        endDay :: DT.Day
-        endDay = DT.fromGregorian (toInteger eYear) eMonth eDay
-        startTimeSecond = (sHour * 3600) + (sMinute * 60) + sSecond
-        endTimeSecond = (eHour * 3600) + (eMinute * 60) + eSecond
-        ---
         startTime :: DT.UTCTime
-        startTime = DT.UTCTime startDay $ DT.secondsToDiffTime $ toInteger startTimeSecond
+        startTime = DT.UTCTime (toDay (toInteger sYear) sMonth sDay) $ DT.secondsToDiffTime $ toInteger $ timeInSecond sHour sMinute sSecond
         endTime :: DT.UTCTime
-        endTime = DT.UTCTime endDay $ DT.secondsToDiffTime $ toInteger endTimeSecond
-        --
+        endTime = DT.UTCTime (toDay (toInteger eYear) eMonth eDay) $ DT.secondsToDiffTime $ toInteger $ timeInSecond eHour eMinute eSecond
+        diffTime :: Pico
         diffTime = DT.nominalDiffTimeToSeconds $ DT.diffUTCTime startTime endTime
 
+-- hours -> minutes -> seconds
+timeInSecond :: Int -> Int -> Int -> Int
+timeInSecond h m s = (h * 3600) + (m * 60) + s
+
+-- years -> month -> days
+toDay :: Integer -> Int -> Int -> DT.Day
+toDay = DT.fromGregorian
 
 filterBySummary :: String -> Event -> Bool
 filterBySummary s (Event _ _ _ _ _ sum' _) = case sum' of
