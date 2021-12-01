@@ -105,6 +105,12 @@ readCalendar fp = do
     content <- hGetContents file
     return $ recognizeCalendar content
 
+-- Function to get the printCalendar from a Maybe Calendar
+printMaybeCalendar :: Maybe Calendar -> IO ()
+printMaybeCalendar cal = case cal of
+    Nothing  -> putStrLn "No calendar"
+    Just cal' -> putStr $ printCalendar cal'
+
 -- Exercise 9
 -- DO NOT use a derived Show instance. Your printing style needs to be nicer than that :)
 printCalendar :: Calendar -> String
