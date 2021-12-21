@@ -52,7 +52,7 @@ data Token
 scanCalendar :: Parser Char [Token]
 scanCalendar = some (choice [parseBeginT, parseProIdT, parseVersT, parseDtStampT, parseUidT, parseStartT, parseDtEndT, parseDescT, parseSumT, parseLocT, parseEndT])
 
-parseBeginT :: Parser Char Token
+parseBeginT :: Parser Char Token --list of parsers that wil geturn a token if the input starts with the fitting tag
 parseBeginT = pack (token "BEGIN:") ( BeginT <$ some (satisfy (/= '\r'))) (token "\r\n")
 parseProIdT = pack (token "PRODID:") ( ProdidT <$> some (satisfy (/= '\r'))) (token "\r\n")
 parseVersT = pack (token "VERSION:") ( VersionT V2 <$ some (satisfy (/= '\r'))) (token "\r\n")
@@ -68,19 +68,13 @@ parseSumT =  pack (token "SUMMARY:") (SumT <$> some (satisfy (/= '\r'))) (token 
 parseLocT =  pack (token "LOCATION:") (LocT <$> some (satisfy (/= '\r'))) (token "\r\n")
 parseEndT = pack (token "END:") ( EndT <$ some (satisfy (/= '\r'))) (token "\r\n")
 
--- Testing calendar
-aa = fromJust $ recognizeCalendar "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//hacksw/handcal//NONSGML v1.0//EN\r\nBEGIN:VEVENT\r\nUID:19970610T172345Z-AF23B2@example.com\r\nDTSTAMP:19970610T172345Z\r\nDTSTART:19970714T170000Z\r\nDTEND:19970715T040000Z\r\nSUMMARY:Bastille Day Party\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-
--- Testing calendar
-aa' = fromJust $ recognizeCalendar "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//hacksw/handcal//NONSGML v1.0//EN\r\nBEGIN:VEVENT\r\nUID:19970610T172345Z-AF23B2@example.com\r\nDTSTAMP:19970610T172345Z\r\nDTSTART:19970614T170000Z\r\nDTEND:19970715T040000Z\r\nSUMMARY:Bastille Day Party\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:19970610T172345Z-AF23B2@example.com\r\nDTSTAMP:19970610T172345Z\r\nDTSTART:19970714T090000Z\r\nDTEND:19970714T210000Z\r\nSUMMARY:Bastille Day Party\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:19970610T172345Z-AF23B2@example.com\r\nDTSTAMP:19970610T172345Z\r\nDTSTART:19970714T170000Z\r\nDTEND:19970815T040000Z\r\nSUMMARY:Bastille Day Party\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-
-parseCalendar :: Parser Token Calendar
+parseCalendar :: Parser Token Calendar 
 parseCalendar = pack (symbol BeginT) (Calendar <$> parseVers <*> parseProId <*> many parseEvent ) (symbol EndT)
 
-parseEvent :: Parser Token Event
+parseEvent :: Parser Token Event -- takes all tokens until it reaches the end op the event and than uses each token to construct the event
 parseEvent = pack (symbol BeginT) ( getEvent <$> (sort <$> many (satisfy (/= EndT))) )(symbol EndT)
 
-getEvent :: [Token] -> Event
+getEvent :: [Token] -> Event -- construct event based on de set of tokens its given
 getEvent (DtstampT a: UidT b: StartT c: DtEndT d: xs) = f $ getDesc xs
             where getDesc [] = [Nothing,Nothing,Nothing]
                   getDesc (DescT y:ys) = getSum [Just y] ys
@@ -92,7 +86,7 @@ getEvent (DtstampT a: UidT b: StartT c: DtEndT d: xs) = f $ getDesc xs
                   getLoc x [LocT y] = x ++ [Just y]
                   f [x,y,z]= Event a b c d x y z
                   
-parseVers :: Parser Token Version
+parseVers :: Parser Token Version --parsers for the version aand productid token
 parseVers = V2 <$ symbol (VersionT V2)
 parseProId :: Parser Token String
 parseProId = (\(ProdidT x) -> x) <$> anySymbol
